@@ -1,7 +1,7 @@
 import cloudscraper
 from bs4 import BeautifulSoup
 
-def fetch_investing_news():
+def get_most_popular_news_content():
     url = "https://www.investing.com/news/most-popular-news"
     
     # Create scraper instance
@@ -21,31 +21,38 @@ def fetch_investing_news():
         print(f"Error: {e}")
         return None
 
-def parse_news(html_content):
+def get_most_popular_news(html_content):
+    data = []
     if not html_content:
-        return
+        return data
 
     soup = BeautifulSoup(html_content, 'html.parser')
-    
-    # Find articles based on the identified classes
-    # We look for <a> tags that contain 'whitespace-normal' and 'font-bold' in their class attribute
     articles = soup.find_all('a', class_=lambda x: x and 'whitespace-normal' in x and 'font-bold' in x)
+    description = soup.find_all('p', class_=lambda x: x and 'mt-[0.5rem] hidden overflow-hidden text-xs leading-[1.38rem] md:block' in x)
+    provider = soup.find_all('span', attrs={'data-test': 'news-provider-name'}, class_=lambda x: x and 'shrink-0 text-xs leading-4' in x)
+    last_update = soup.find_all('time', class_=lambda x: x and 'mx-1 shrink-0 text-xs leading-4' in x)
 
-    print(f"Found {len(articles)} articles.")
-
-    for article in articles:
+    for idx, article in enumerate(articles):
         title = article.get_text(strip=True)
         link = article.get('href')
-        
-        # Handle relative URLs
+
         if link and link.startswith('/'):
             link = f"https://www.investing.com{link}"
-            
+
         if title and link:
-            print(f"Title: {title}")
-            print(f"Link: {link}")
-            print("-" * 40)
+            data.append(
+                {
+                    "title": title, 
+                    "link": link, 
+                    "description": description[idx].get_text(strip=True), 
+                    "provider": provider[idx].get_text(strip=True),
+                    "last_update": last_update[idx].get_text(strip=True),
+                }
+            )
+
+    return data
 
 if __name__ == "__main__":
-    html_content = fetch_investing_news()
-    parse_news(html_content)
+    html_content = get_most_popular_news_content()
+    data = get_most_popular_news(html_content)
+    print(data)
