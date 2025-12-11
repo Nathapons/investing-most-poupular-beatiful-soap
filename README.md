@@ -6,6 +6,9 @@ Get Most Popular News by Python
 ## Prerequisites
 
 *   **Python 3.12+**
+## Data Resource
+
+[Most Popular Financial News on Investing.com](https://www.investing.com/news/most-popular-news)
 ## Acknowledgements
 
  - [cloudscraper](https://docs.python-requests.org/en/latest/user/quickstart/)
